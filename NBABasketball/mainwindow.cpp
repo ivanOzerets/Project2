@@ -3,10 +3,13 @@
 #include "admindialog.h"
 #include "map.h"
 
+#include "login.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
 
     // Open the database -> you'll need to specify the path it's under on your computer

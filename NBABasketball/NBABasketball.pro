@@ -27,16 +27,24 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    admindialog.cpp
+    admindialog.cpp \
+    teamselection.cpp \
+    dbmanager.cpp \
+    login.cpp
 
 HEADERS += \
         mainwindow.h \
     map.h \
-    admindialog.h
+    admindialog.h \
+    teamselection.h \
+    dbmanager.h \
+    login.h
 
 FORMS += \
         mainwindow.ui \
-    admindialog.ui
+    admindialog.ui \
+    teamselection.ui \
+    login.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
