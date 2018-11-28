@@ -18,6 +18,16 @@ public:
 private slots:
     void on_adminButton_clicked();
 
+    void on_addTeamButton_clicked();
+
+    void on_changeSouvenirPricesButton_clicked();
+
+    void on_addSouvenirsButton_clicked();
+
+    void on_deleteSouvenirsButton_clicked();
+
+    void on_modifyArenaInformationButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
