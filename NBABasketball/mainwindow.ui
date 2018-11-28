@@ -123,6 +123,19 @@
        <string>Modify Arena Information</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="adminBackPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>580</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_3">
      <widget class="QLabel" name="addTeamLabel">
@@ -447,21 +460,11 @@
        </rect>
       </property>
      </widget>
-     <widget class="QTableWidget" name="modifyArenaInformationTableWidget">
-      <property name="geometry">
-       <rect>
-        <x>550</x>
-        <y>190</y>
-        <width>571</width>
-        <height>231</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QLabel" name="currentArenaInformationLabel">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>150</y>
+        <x>530</x>
+        <y>120</y>
         <width>251</width>
         <height>41</height>
        </rect>
@@ -478,7 +481,7 @@
        <rect>
         <x>420</x>
         <y>290</y>
-        <width>101</width>
+        <width>81</width>
         <height>23</height>
        </rect>
       </property>
@@ -486,18 +489,31 @@
        <string>&lt;&lt; Update &gt;&gt;</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="maiBackPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>580</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </widget>
+     <widget class="QTreeView" name="modifyArenaInformationTreeView">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>160</y>
+        <width>601</width>
+        <height>431</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1176</width>
-     <height>21</height>
-    </rect>
-   </property>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
