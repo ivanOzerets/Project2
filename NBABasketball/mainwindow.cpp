@@ -124,3 +124,24 @@ void MainWindow::on_adminBackPushButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
 }
+
+// Receive the selection from the arenaSelectionComboBox and update the lineEdits
+// on this window to contain the information already stored in the database
+void MainWindow::on_arenaSelectionComboBox_currentIndexChanged(const QString &arg1)
+{
+    // Create the query for the row in the Information table where ArenaName == arg1
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT * FROM Information WHERE ArenaName = '"+arg1+"'");
+    qry->exec();
+
+    // Fill the lineEdits on this window with the queried data
+    qry->first();
+    ui->conferenceLineEdit->setText(qry->value(0).toString());      // Conference
+    ui->divisionLineEdit->setText(qry->value(1).toString());        // Division
+    ui->teamNameLineEdit->setText(qry->value(2).toString());        // Team Name
+    ui->locationLineEdit->setText(qry->value(3).toString());        // Location
+    ui->arenaNameLineEdit->setText(qry->value(4).toString());       // Arena Name
+    ui->stadiumCapacityLineEdit->setText(qry->value(5).toString()); // Stadium Capacity
+    ui->joinedLeagueLineEdit->setText(qry->value(6).toString());    // Joined League
+    ui->coachLineEdit->setText(qry->value(7).toString());           // Coach
+}

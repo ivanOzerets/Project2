@@ -44,6 +44,8 @@ private slots:
 
     void on_adminBackPushButton_clicked();
 
+    void on_arenaSelectionComboBox_currentIndexChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 
