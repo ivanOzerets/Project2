@@ -91,7 +91,7 @@ void MainWindow::on_modifyArenaInformationButton_clicked()
 {
     // Create the query for the ArenaName column in the Information table
     QSqlQuery *qry = new QSqlQuery(db);
-    qry->prepare("SELECT ArenaName FROM Information");
+    qry->prepare("SELECT ArenaName FROM Information ORDER BY ArenaName ASC");
     qry->exec();
 
     // Create the modal to hold the query and set the arenaSelectionComboBox
@@ -100,7 +100,7 @@ void MainWindow::on_modifyArenaInformationButton_clicked()
     ui->arenaSelectionComboBox->setModel(modal);
 
     // Query for the entire Information table
-    qry->prepare("SELECT * FROM Information");
+    qry->prepare("SELECT * FROM Information ORDER BY ArenaName ASC");
     qry->exec();
 
     // Create the modal to hold the new query and set the modifyArenaInformationTreeView
@@ -108,6 +108,10 @@ void MainWindow::on_modifyArenaInformationButton_clicked()
     modal2->setQuery(*qry);
     ui->modifyArenaInformationTreeView->resizeColumnToContents(25);
     ui->modifyArenaInformationTreeView->setModel(modal2);
+
+    // Set input masks on stadiumCapacityLineEdit, joinedLeagueLineEdit
+    ui->stadiumCapacityLineEdit->setInputMask("0000000000");
+    ui->joinedLeagueLineEdit->setInputMask("9999");
 
     // Go to Modify Arena Information window
     ui->stackedWidget->setCurrentIndex(6);
@@ -144,4 +148,44 @@ void MainWindow::on_arenaSelectionComboBox_currentIndexChanged(const QString &ar
     ui->stadiumCapacityLineEdit->setText(qry->value(5).toString()); // Stadium Capacity
     ui->joinedLeagueLineEdit->setText(qry->value(6).toString());    // Joined League
     ui->coachLineEdit->setText(qry->value(7).toString());           // Coach
+}
+
+// Use the lineEdits to modify the selected arena in the database,
+// and update the table to reflect the changes
+void MainWindow::on_updatePushButton_clicked()
+{
+    // Create a placeholder for the current index of the arenaSelectionComboBox
+    QString placeholder = ui->arenaSelectionComboBox->currentText();
+
+    // Delete from the database the row where ArenaName == placeholder
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Information WHERE ArenaName = '"+placeholder+"'");
+    qry->exec();
+
+    // Insert the newly modified arena
+    qry->prepare("INSERT INTO Information (Conference, Division, TeamName, Location, ArenaName, StadiumCapacity, JoinedLeague, Coach) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    qry->addBindValue(ui->conferenceLineEdit->text());          // Conference
+    qry->addBindValue(ui->divisionLineEdit->text());            // Division
+    qry->addBindValue(ui->teamNameLineEdit->text());            // TeamName
+    qry->addBindValue(ui->locationLineEdit->text());            // Location
+    qry->addBindValue(ui->arenaNameLineEdit->text());           // ArenaName
+    qry->addBindValue(ui->stadiumCapacityLineEdit->text());     // StadiumCapacity
+    qry->addBindValue(ui->joinedLeagueLineEdit->text());        // JoinedLeague
+    qry->addBindValue(ui->coachLineEdit->text());               // Coach
+    qry->exec();
+
+    // Update the arenaSelectionComboBox (comboBox) -> Reused code from on_modifyArenaInformationButton_clicked()
+    qry->prepare("SELECT ArenaName FROM Information ORDER BY ArenaName ASC");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->arenaSelectionComboBox->setModel(modal);
+
+    // Update the modifyArenaInformationTreeView (treeView) -> Reused code from on_modifyArenaInformationButton_clicked()
+    qry->prepare("SELECT * FROM Information ORDER BY ArenaName ASC");
+    qry->exec();
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->modifyArenaInformationTreeView->resizeColumnToContents(25);
+    ui->modifyArenaInformationTreeView->setModel(modal2);
 }

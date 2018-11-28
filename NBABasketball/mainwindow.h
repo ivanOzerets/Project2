@@ -46,6 +46,8 @@ private slots:
 
     void on_arenaSelectionComboBox_currentIndexChanged(const QString &arg1);
 
+    void on_updatePushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
