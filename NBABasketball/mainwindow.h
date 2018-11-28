@@ -48,6 +48,14 @@ private slots:
 
     void on_updatePushButton_clicked();
 
+    void on_atBackPushButton_clicked();
+
+    void on_cspBackPushButton_clicked();
+
+    void on_asBackPushButton_clicked();
+
+    void on_dsBackPushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 

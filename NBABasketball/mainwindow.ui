@@ -20,11 +20,11 @@
       <x>9</x>
       <y>9</y>
       <width>1161</width>
-      <height>611</height>
+      <height>631</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>6</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QLabel" name="label">
@@ -154,6 +154,19 @@
        <string>Add Team</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="atBackPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>600</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_4">
      <widget class="QLabel" name="changeSouvenirPricesLabel">
@@ -170,6 +183,45 @@
       </property>
       <property name="text">
        <string>Change Souvenir Prices</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="selectTeamPromptLabel">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>120</y>
+        <width>341</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 16pt &quot;Arial&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Select Team's Souvenirs to Modify:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="teamSelectionComboBox">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>130</y>
+        <width>261</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="cspBackPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>600</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back</string>
       </property>
      </widget>
     </widget>
@@ -190,6 +242,19 @@
        <string>Add Souvenirs</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="asBackPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>600</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_6">
      <widget class="QLabel" name="deleteSouvenirsLabel">
@@ -206,6 +271,19 @@
       </property>
       <property name="text">
        <string>Delete Souvenirs</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="dsBackPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>600</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back</string>
       </property>
      </widget>
     </widget>
@@ -493,7 +571,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>580</y>
+        <y>600</y>
         <width>75</width>
         <height>23</height>
        </rect>

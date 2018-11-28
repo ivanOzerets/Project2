@@ -106,7 +106,6 @@ void MainWindow::on_modifyArenaInformationButton_clicked()
     // Create the modal to hold the new query and set the modifyArenaInformationTreeView
     QSqlQueryModel *modal2 = new QSqlQueryModel();
     modal2->setQuery(*qry);
-    ui->modifyArenaInformationTreeView->resizeColumnToContents(25);
     ui->modifyArenaInformationTreeView->setModel(modal2);
 
     // Set input masks on stadiumCapacityLineEdit, joinedLeagueLineEdit
@@ -186,6 +185,29 @@ void MainWindow::on_updatePushButton_clicked()
     qry->exec();
     QSqlQueryModel *modal2 = new QSqlQueryModel();
     modal2->setQuery(*qry);
-    ui->modifyArenaInformationTreeView->resizeColumnToContents(25);
     ui->modifyArenaInformationTreeView->setModel(modal2);
+}
+
+// Go from Add Team window to Admin window
+void MainWindow::on_atBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+// Go from Change Souvenir Prices window to Admin window
+void MainWindow::on_cspBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+// Go from Add Souvenirs window to Admin window
+void MainWindow::on_asBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+// Go from Delete Souvenirs window to Admin window
+void MainWindow::on_dsBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
 }
