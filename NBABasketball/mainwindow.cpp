@@ -264,5 +264,42 @@ void MainWindow::on_souvenirSelectionComboBox_currentIndexChanged(const QString 
     // Fill the lineEdits on this window with the queried data
     qry->first();
     ui->souvenirNameLineEdit->setText(qry->value(0).toString());    // Souvenir
-    ui->souvenirPriceLineEdit_2->setText(qry->value(1).toString()); // Price
+    ui->souvenirPriceLineEdit->setText(qry->value(1).toString()); // Price
+}
+
+// Use the lineEdits to modify the selected souvenir in the database,
+// and update the table to reflect the changes
+void MainWindow::on_updatePushButton_CSP_clicked()
+{
+    // Create a placeholder for the current index of the teamSelectionComboBox  (Team Name)
+    QString placeholder = ui->teamSelectionComboBox->currentText();
+
+    // Create a placeholder for the current index of the souvenirSelectionComboBox  (Souvenir Name)
+    QString placeholder2 = ui->souvenirSelectionComboBox->currentText();
+
+    // Delete from the database the row where TeamName == placeholder && Souvenir == placeholder2
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Souvenirs WHERE TeamName = '"+placeholder+"' AND Souvenir = '"+placeholder2+"'");
+    qry->exec();
+
+    // Insert the newly modified arena
+    qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES (?, ?, ?)");
+    qry->addBindValue(placeholder);                         // Team Name
+    qry->addBindValue(ui->souvenirNameLineEdit->text());    // Souvenir
+    qry->addBindValue(ui->souvenirPriceLineEdit->text());   // Price
+    qry->exec();
+
+    // Update the teamSelectionComboBox
+    qry->prepare("SELECT TeamName FROM Souvenirs ORDER BY TeamName ASC");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->teamSelectionComboBox->setModel(modal);
+
+    // Update the modifySouvenirInformationTreeView
+    qry->prepare("SELECT * FROM Souvenirs ORDER BY TeamName ASC");
+    qry->exec();
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->modifySouvenirInformationTreeView->setModel(modal2);
 }

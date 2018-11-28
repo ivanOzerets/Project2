@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QLabel" name="label">
@@ -292,7 +292,7 @@
        <string>Souvenir Price:</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="souvenirPriceLineEdit_2">
+     <widget class="QLineEdit" name="souvenirPriceLineEdit">
       <property name="geometry">
        <rect>
         <x>140</x>
@@ -326,6 +326,19 @@
         <width>731</width>
         <height>461</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="updatePushButton_CSP">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>280</y>
+        <width>81</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;&lt; Update &gt;&gt;</string>
       </property>
      </widget>
     </widget>

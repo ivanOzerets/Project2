@@ -60,6 +60,8 @@ private slots:
 
     void on_souvenirSelectionComboBox_currentIndexChanged(const QString &arg1);
 
+    void on_updatePushButton_CSP_clicked();
+
 private:
     Ui::MainWindow *ui;
 
