@@ -56,6 +56,10 @@ private slots:
 
     void on_dsBackPushButton_clicked();
 
+    void on_teamSelectionComboBox_currentIndexChanged(const QString &arg1);
+
+    void on_souvenirSelectionComboBox_currentIndexChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 
