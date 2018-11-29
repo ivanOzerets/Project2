@@ -62,6 +62,8 @@ private slots:
 
     void on_updatePushButton_CSP_clicked();
 
+    void on_updatePushButton_AS_clicked();
+
 private:
     Ui::MainWindow *ui;
 

@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Open the database -> you'll need to specify the path it's under on your computer
-    DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
+    DB_Path = "C:\\Users\\Alecstar\\Documents\\GitHub\\Project2\\NBAinfo.db";
     dbOpen();
 }
 
@@ -61,17 +61,26 @@ void MainWindow::on_adminButton_clicked()
     }
 }
 
+
+
+/*
+ *  StackedWidget Page 1 -> Administrative Tools
+ */
+
 // Go to Add Team window
 void MainWindow::on_addTeamButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(2);
 }
 
-// Set the teamSelectionComboBox and ___TreeView to display information
-// before going to the Change Souvenir Prices window
+// Go to Change Souvenir Prices Window
+// Set the teamSelectionComboBox and modifySouvenirInformationTreeView
+// to display information beforehand
 void MainWindow::on_changeSouvenirPricesButton_clicked()
 {
     // Create the query for the TeamName column in the Information table
+    // -> because TeamName only appears once in Information table rather than
+    //    multiple times in Souvenirs table
     QSqlQuery *qry = new QSqlQuery(db);
     qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
     qry->exec();
@@ -90,24 +99,74 @@ void MainWindow::on_changeSouvenirPricesButton_clicked()
     modal2->setQuery(*qry);
     ui->modifySouvenirInformationTreeView->setModel(modal2);
 
+    // Set input masks on souvenirPriceLineEdit
+    ui->souvenirPriceLineEdit->setInputMask("009.99");
+
     // Go to Change Souvenir Prices window
     ui->stackedWidget->setCurrentIndex(3);
 }
 
 // Go to Add Souvenirs window
+// Set the asTeamSelectionComboBox and modifyArenaInformationTreeView
+// to display information beforehand
 void MainWindow::on_addSouvenirsButton_clicked()
 {
+    // Create the query for the TeamName column in the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the query and set the arenaSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->asTeamSelectionComboBox->setModel(modal);
+
+    // Query for the entire Information table
+    qry->prepare("SELECT * FROM Souvenirs ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the modifyArenaInformationTreeView
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->addSouvenirTreeView->setModel(modal2);
+
+    // Set input masks on asSouvenirPriceLineEdit
+    ui->asSouvenirPriceLineEdit->setInputMask("009.99");
+
+    // Go to Add Souvenirs window
     ui->stackedWidget->setCurrentIndex(4);
 }
 
 // Go to Delete Souvenirs window
+// Set the dsTeamSelectionComboBox and deleteSouvenirTreeView
+// to display information beforehand
 void MainWindow::on_deleteSouvenirsButton_clicked()
 {
+    // Create the query for the TeamName column in the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the query and set the dsTeamSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->dsTeamSelectionComboBox->setModel(modal);
+
+    // Query for the entire Information table
+    qry->prepare("SELECT * FROM Souvenirs ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the deleteSouvenirTreeView
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->deleteSouvenirTreeView->setModel(modal2);
+
     ui->stackedWidget->setCurrentIndex(5);
 }
 
+// Go to Modify Arena Information Window
 // Set the arenaSelectionComboBox and modifyArenaInformationTreeView
-// to display information before going to the Modify Arena Information window
+// to display information beforehand
 void MainWindow::on_modifyArenaInformationButton_clicked()
 {
     // Create the query for the ArenaName column in the Information table
@@ -137,17 +196,148 @@ void MainWindow::on_modifyArenaInformationButton_clicked()
     ui->stackedWidget->setCurrentIndex(6);
 }
 
-// Go from Modify Arena Information window to Admin window
-void MainWindow::on_maiBackPushButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(1);
-}
-
 // Go from Admin window to Main window
 void MainWindow::on_adminBackPushButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
 }
+
+
+
+/*
+ * StackedWidget Page 4 -> Change Souvenir Prices
+ */
+
+// Set the souvenirSelectionComboBox to display the souvenirs of the team found in
+// the teamSelectionComboBox whenever the teamSelectionComboBox changes
+void MainWindow::on_teamSelectionComboBox_currentIndexChanged(const QString &arg1)
+{
+    // Create the query for the row in the Souvenirs table where TeamName == arg1
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT Souvenir FROM Souvenirs WHERE TeamName = '"+arg1+"'");
+    qry->exec();
+
+    // Create the modal to hold the query and set the souvenirSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->souvenirSelectionComboBox->setModel(modal);
+}
+
+// Receive the selection from the souvenirSelectionComboBox and update the lineEdits
+// on this window to contain the information already stored in the database
+void MainWindow::on_souvenirSelectionComboBox_currentIndexChanged(const QString &arg1)
+{
+    // Create a temporary placeholder for the selection in the teamSelectionComboBox
+    QString placeholder = ui->teamSelectionComboBox->currentText();
+
+    // Create the query for the row in the Souvenir table where TeamName == placeholder
+    // and Souvenir == arg1
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT Souvenir, Price FROM Souvenirs WHERE TeamName = '"+placeholder+"' AND Souvenir = '"+arg1+"'");
+    qry->exec();
+
+    // Fill the lineEdits on this window with the queried data
+    qry->first();
+    ui->souvenirNameLineEdit->setText(qry->value(0).toString());    // Souvenir
+    ui->souvenirPriceLineEdit->setText(qry->value(1).toString()); // Price
+}
+
+// Use the lineEdits to modify the selected souvenir in the database,
+// and update the table to reflect the changes
+void MainWindow::on_updatePushButton_CSP_clicked()
+{
+    // Create a placeholder for the current index of the teamSelectionComboBox  (Team Name)
+    QString placeholder = ui->teamSelectionComboBox->currentText();
+
+    // Create a placeholder for the current index of the souvenirSelectionComboBox  (Souvenir Name)
+    QString placeholder2 = ui->souvenirSelectionComboBox->currentText();
+
+    // Delete from the database the row where TeamName == placeholder && Souvenir == placeholder2
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Souvenirs WHERE TeamName = '"+placeholder+"' AND Souvenir = '"+placeholder2+"'");
+    qry->exec();
+
+    // Insert the newly modified arena
+    qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES (?, ?, ?)");
+    qry->addBindValue(placeholder);                             // Team Name
+    qry->addBindValue(ui->souvenirNameLineEdit->text());        // Souvenir
+    qry->addBindValue('$' + ui->souvenirPriceLineEdit->text()); // Price
+    qry->exec();
+
+    // Update the teamSelectionComboBox
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->teamSelectionComboBox->setModel(modal);
+
+    // Update the modifySouvenirInformationTreeView
+    qry->prepare("SELECT * FROM Souvenirs ORDER BY TeamName ASC");
+    qry->exec();
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->modifySouvenirInformationTreeView->setModel(modal2);
+}
+
+// Go from Change Souvenir Prices window to Admin window
+void MainWindow::on_cspBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+
+
+/*
+ * StackedWidget Page 5 -> Add Souvenirs
+ */
+
+// Receive the selection from the asTeamSelectionComboBox and use the lineEdits
+// to add a souvenir. Update the table to reflect the changes
+void MainWindow::on_updatePushButton_AS_clicked()
+{
+    // Create a placeholder for the current index of the asTeamSelectionComboBox
+    QString placeholder = ui->asTeamSelectionComboBox->currentText();
+
+    // Add the souvenir
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES (?, ?, ?)");
+    qry->addBindValue(placeholder);                               // TeamName
+    qry->addBindValue(ui->addSouvenirNameLineEdit->text());       // Souvenir
+    qry->addBindValue('$' + ui->asSouvenirPriceLineEdit->text()); // Price
+    qry->exec();
+
+    // Update the modifyArenaInformationTreeView
+    qry->prepare("SELECT * FROM Souvenirs ORDER BY TeamName ASC");
+    qry->exec();
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->addSouvenirTreeView->setModel(modal2);
+
+    // Clear the lineEdits
+    ui->addSouvenirNameLineEdit->clear();
+    ui->asSouvenirPriceLineEdit->clear();
+}
+
+// Go from Add Souvenirs window to Admin window
+void MainWindow::on_asBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+
+
+/*
+ * StackedWidget Page 6 -> Delete Souvenirs
+ */
+
+
+
+
+
+
+/*
+ * StackedWidget Page 7 -> Modify Arena Information
+ */
 
 // Receive the selection from the arenaSelectionComboBox and update the lineEdits
 // on this window to contain the information already stored in the database
@@ -209,20 +399,21 @@ void MainWindow::on_updatePushButton_clicked()
     ui->modifyArenaInformationTreeView->setModel(modal2);
 }
 
+// Go from Modify Arena Information window to Admin window
+void MainWindow::on_maiBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+
+
+
+/*
+ * BACK BUTTONS THAT NEED TO BE PLACED WITH THEIR STACKEDWIDGET PAGES
+ */
+
 // Go from Add Team window to Admin window
 void MainWindow::on_atBackPushButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(1);
-}
-
-// Go from Change Souvenir Prices window to Admin window
-void MainWindow::on_cspBackPushButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(1);
-}
-
-// Go from Add Souvenirs window to Admin window
-void MainWindow::on_asBackPushButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(1);
 }
@@ -233,73 +424,10 @@ void MainWindow::on_dsBackPushButton_clicked()
     ui->stackedWidget->setCurrentIndex(1);
 }
 
-// Set the souvenirSelectionComboBox to display the souvenirs of the team found in
-// the teamSelectionComboBox whenever the teamSelectionComboBox changes
-void MainWindow::on_teamSelectionComboBox_currentIndexChanged(const QString &arg1)
-{
-    // Create the query for the row in the Souvenirs table where TeamName == arg1
-    QSqlQuery *qry = new QSqlQuery(db);
-    qry->prepare("SELECT Souvenir FROM Souvenirs WHERE TeamName = '"+arg1+"'");
-    qry->exec();
 
-    // Create the modal to hold the query and set the souvenirSelectionComboBox
-    QSqlQueryModel *modal = new QSqlQueryModel();
-    modal->setQuery(*qry);
-    ui->souvenirSelectionComboBox->setModel(modal);
-}
 
-// Receive the selection from the ___ComboBox and update the lineEdits
-// on this window to contain the information already stored in the database
-void MainWindow::on_souvenirSelectionComboBox_currentIndexChanged(const QString &arg1)
-{
-    // Create a temporary placeholder for the selection in the teamSelectionComboBox
-    QString placeholder = ui->teamSelectionComboBox->currentText();
 
-    // Create the query for the row in the Souvenir table where TeamName == placeholder
-    // and Souvenir == arg1
-    QSqlQuery *qry = new QSqlQuery(db);
-    qry->prepare("SELECT Souvenir, Price FROM Souvenirs WHERE TeamName = '"+placeholder+"' AND Souvenir = '"+arg1+"'");
-    qry->exec();
 
-    // Fill the lineEdits on this window with the queried data
-    qry->first();
-    ui->souvenirNameLineEdit->setText(qry->value(0).toString());    // Souvenir
-    ui->souvenirPriceLineEdit->setText(qry->value(1).toString()); // Price
-}
 
-// Use the lineEdits to modify the selected souvenir in the database,
-// and update the table to reflect the changes
-void MainWindow::on_updatePushButton_CSP_clicked()
-{
-    // Create a placeholder for the current index of the teamSelectionComboBox  (Team Name)
-    QString placeholder = ui->teamSelectionComboBox->currentText();
 
-    // Create a placeholder for the current index of the souvenirSelectionComboBox  (Souvenir Name)
-    QString placeholder2 = ui->souvenirSelectionComboBox->currentText();
 
-    // Delete from the database the row where TeamName == placeholder && Souvenir == placeholder2
-    QSqlQuery *qry = new QSqlQuery(db);
-    qry->prepare("DELETE FROM Souvenirs WHERE TeamName = '"+placeholder+"' AND Souvenir = '"+placeholder2+"'");
-    qry->exec();
-
-    // Insert the newly modified arena
-    qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES (?, ?, ?)");
-    qry->addBindValue(placeholder);                         // Team Name
-    qry->addBindValue(ui->souvenirNameLineEdit->text());    // Souvenir
-    qry->addBindValue(ui->souvenirPriceLineEdit->text());   // Price
-    qry->exec();
-
-    // Update the teamSelectionComboBox
-    qry->prepare("SELECT TeamName FROM Souvenirs ORDER BY TeamName ASC");
-    qry->exec();
-    QSqlQueryModel *modal = new QSqlQueryModel();
-    modal->setQuery(*qry);
-    ui->teamSelectionComboBox->setModel(modal);
-
-    // Update the modifySouvenirInformationTreeView
-    qry->prepare("SELECT * FROM Souvenirs ORDER BY TeamName ASC");
-    qry->exec();
-    QSqlQueryModel *modal2 = new QSqlQueryModel();
-    modal2->setQuery(*qry);
-    ui->modifySouvenirInformationTreeView->setModel(modal2);
-}
