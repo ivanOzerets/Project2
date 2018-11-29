@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Open the database -> you'll need to specify the path it's under on your computer
-    DB_Path = "C:\\Users\\Alecstar\\Documents\\GitHub\\Project2\\NBAinfo.db";
+    DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
     dbOpen();
 }
 
@@ -68,8 +68,29 @@ void MainWindow::on_adminButton_clicked()
  */
 
 // Go to Add Team window
+// Set the addExpansionTreeView, addDistanceTreeView to display information beforehand
 void MainWindow::on_addTeamButton_clicked()
 {
+    // Query for the entire Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT * FROM Information");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the addTeamTreeView
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->addExpansionTreeView->setModel(modal);
+
+    // Query for the entire Distances table
+    qry->prepare("SELECT * FROM Distances");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the addTeamTreeView
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->addDistanceTreeView->setModel(modal2);
+
+    // Go to Add Team window
     ui->stackedWidget->setCurrentIndex(2);
 }
 
@@ -205,7 +226,103 @@ void MainWindow::on_adminBackPushButton_clicked()
 
 
 /*
- * StackedWidget Page 4 -> Change Souvenir Prices
+ * StackedWidget Page 2 -> Add Team
+ */
+
+// Prompt the user for a file, upload the file, add the new team to the database,
+// and update the addExpansionTreeView
+void MainWindow::on_uploadExpansionPushButton_clicked()
+{
+    // Create the query pointer for later use
+    QSqlQuery *qry;
+    qry = new QSqlQuery(db);
+
+    // Prompt for Expansion File, Receive, Parse, and Upload to the Database
+    QString inputFileName = QFileDialog::getOpenFileName(this, tr("Input Expansion File"), "",
+                                                         "Comma Seperated Value (*.csv)");
+    QFile file(inputFileName);
+
+    if(file.open(QIODevice::ReadOnly)) {
+        QString data;
+
+        while(!file.atEnd()) {
+            data = file.readLine();
+
+            QStringList list = data.split(',', QString::SkipEmptyParts);
+
+            qry->prepare("INSERT INTO Information (Conference, Division, TeamName, Location, ArenaName, StadiumCapacity, JoinedLeague, Coach) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            qry->addBindValue(list[0]);
+            qry->addBindValue(list[1]);
+            qry->addBindValue(list[2]);
+            qry->addBindValue(list[3]+", "+list[4]);
+            qry->addBindValue(list[5]);
+            qry->addBindValue(list[6]);
+            qry->addBindValue(list[7]);
+            qry->addBindValue(list[8]);
+            qry->exec();
+        }
+    }
+
+    file.close();
+
+    // Update the addExpansionTreeView to reflect the changes
+    qry->prepare("SELECT * FROM Information");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->addExpansionTreeView->setModel(modal);
+}
+
+// Prompt the user for a file, upload the file, add the new team to the database,
+// and update the addDistanceTreeView
+void MainWindow::on_uploadDistancePushButton_clicked()
+{
+    // Create the query pointer for later use
+    QSqlQuery *qry;
+    qry = new QSqlQuery(db);
+
+    // Prompt for Distance File, Receive, Parse, and Upload to the Database
+    QString inputFileName = QFileDialog::getOpenFileName(this, tr("Input Distance File"), "",
+                                                          "Comma Seperated Value (*.csv)");
+    QFile file(inputFileName);
+
+    if(file.open(QIODevice::ReadOnly)) {
+        QString data;
+
+        while(!file.atEnd()) {
+            data = file.readLine();
+
+            QStringList list = data.split(',', QString::SkipEmptyParts);
+
+            qry->prepare("INSERT INTO Distances (BeginningTeamName, BeginningArena, EndingTeamName, Distance) VALUES (?, ?, ?, ?)");
+            qry->addBindValue(list[0]);
+            qry->addBindValue(list[1]);
+            qry->addBindValue(list[2]);
+            qry->addBindValue(list[3]);
+            qry->exec();
+        }
+    }
+
+    file.close();
+
+    // Update the addDistanceTreeView to reflect the changes
+    qry->prepare("SELECT * FROM Distances");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->addDistanceTreeView->setModel(modal);
+}
+
+// Go from Add Team window to Admin window
+void MainWindow::on_atBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+
+
+/*
+ * StackedWidget Page 3 -> Change Souvenir Prices
  */
 
 // Set the souvenirSelectionComboBox to display the souvenirs of the team found in
@@ -288,7 +405,7 @@ void MainWindow::on_cspBackPushButton_clicked()
 
 
 /*
- * StackedWidget Page 5 -> Add Souvenirs
+ * StackedWidget Page 4 -> Add Souvenirs
  */
 
 // Receive the selection from the asTeamSelectionComboBox and use the lineEdits
@@ -327,16 +444,63 @@ void MainWindow::on_asBackPushButton_clicked()
 
 
 /*
- * StackedWidget Page 6 -> Delete Souvenirs
+ * StackedWidget Page 5 -> Delete Souvenirs
  */
 
+// Update the dsSouvenirSelectionComboBox with the souvenirs of the team selected in
+// the dsTeamSelectionComboBox
+void MainWindow::on_dsTeamSelectionComboBox_currentIndexChanged(const QString &arg1)
+{
+    // Create the query for the row in the Souvenirs table where TeamName == arg1
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT Souvenir FROM Souvenirs WHERE TeamName = '"+arg1+"'");
+    qry->exec();
 
+    // Create the modal to hold the query and set the souvenirSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->dsSouvenirSelectionComboBox->setModel(modal);
+}
 
+// Take the selected team and souvenir and delete them from the database
+void MainWindow::on_updatePushButton_DS_clicked()
+{
+    // Create a placeholder for the current index of the teamSelectionComboBox  (Team Name)
+    QString placeholder = ui->dsTeamSelectionComboBox->currentText();
+
+    // Create a placeholder for the current index of the souvenirSelectionComboBox  (Souvenir Name)
+    QString placeholder2 = ui->dsSouvenirSelectionComboBox->currentText();
+
+    // Delete from the database the row where TeamName == placeholder && Souvenir == placeholder2
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Souvenirs WHERE TeamName = '"+placeholder+"' AND Souvenir = '"+placeholder2+"'");
+    qry->exec();
+
+    // Update the dsSouvenirSelectionComboBox
+    qry->prepare("SELECT Souvenir FROM Souvenirs WHERE TeamName = '"+placeholder+"'");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->dsSouvenirSelectionComboBox->setModel(modal);
+
+    // Update the deleteSouvenirTreeView
+    qry->prepare("SELECT * FROM Souvenirs ORDER BY TeamName ASC");
+    qry->exec();
+    QSqlQueryModel *modal2 = new QSqlQueryModel();
+    modal2->setQuery(*qry);
+    ui->deleteSouvenirTreeView->setModel(modal2);
+}
+
+// Go from Delete Souvenirs window to Admin window
+void MainWindow::on_dsBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
 
 
 
 /*
- * StackedWidget Page 7 -> Modify Arena Information
+ * StackedWidget Page 6 -> Modify Arena Information
  */
 
 // Receive the selection from the arenaSelectionComboBox and update the lineEdits
@@ -404,30 +568,5 @@ void MainWindow::on_maiBackPushButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(1);
 }
-
-
-
-
-/*
- * BACK BUTTONS THAT NEED TO BE PLACED WITH THEIR STACKEDWIDGET PAGES
- */
-
-// Go from Add Team window to Admin window
-void MainWindow::on_atBackPushButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(1);
-}
-
-// Go from Delete Souvenirs window to Admin window
-void MainWindow::on_dsBackPushButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(1);
-}
-
-
-
-
-
-
 
 

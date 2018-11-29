@@ -3,12 +3,16 @@
 
 #include <QMainWindow>
 
+// For SQL
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
-
 #include <QSqlQueryModel>
 
+// For File Input
+#include <QFileDialog>
+
+// For Error Checking
 #include <QDebug>
 
 namespace Ui {
@@ -63,6 +67,14 @@ private slots:
     void on_updatePushButton_CSP_clicked();
 
     void on_updatePushButton_AS_clicked();
+
+    void on_dsTeamSelectionComboBox_currentIndexChanged(const QString &arg1);
+
+    void on_updatePushButton_DS_clicked();
+
+    void on_uploadExpansionPushButton_clicked();
+
+    void on_uploadDistancePushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
