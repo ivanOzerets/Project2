@@ -260,6 +260,16 @@ void MainWindow::on_uploadExpansionPushButton_clicked()
             qry->addBindValue(list[7]);
             qry->addBindValue(list[8]);
             qry->exec();
+
+            // Insert the traditional souvenirs for this new team into the Souvenirs table
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Autographed Basketball', '$49.89')");
+            qry->exec();
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Team Pennant', '$17.99')");
+            qry->exec();
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Team Picture', '$29.99')");
+            qry->exec();
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Team Jersey', '$179.99')");
+            qry->exec();
         }
     }
 
