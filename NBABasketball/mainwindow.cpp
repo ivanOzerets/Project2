@@ -584,7 +584,7 @@ void MainWindow::on_DFS_clicked()
 {
     // Create the query for the BeginningTeamName column in the Distances table
     QSqlQuery *qry = new QSqlQuery(db);
-    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->prepare("SELECT BeginningTeamName FROM Distances ORDER BY Distance ASC");
     qry->exec();
 
     // the data in lists
@@ -607,7 +607,7 @@ void MainWindow::on_DFS_clicked()
     }
 
     // preparing beginning teams
-    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->prepare("SELECT BeginningTeamName FROM Distances ORDER BY Distance ASC");
     qry->exec();
 
     // populating beginning team list
@@ -617,7 +617,7 @@ void MainWindow::on_DFS_clicked()
     }
 
     // preparing ending teams
-    qry->prepare("SELECT EndingTeamName FROM Distances");
+    qry->prepare("SELECT EndingTeamName FROM Distances ORDER BY Distance ASC");
     qry->exec();
 
     // populating ending team list
@@ -627,14 +627,14 @@ void MainWindow::on_DFS_clicked()
     }
 
     // preparing distance
-    qry->prepare("SELECT Distance * 10 FROM Distances");
+    qry->prepare("SELECT Distance FROM Distances ORDER BY Distance ASC");
     qry->exec();
 
     // populating dicatance list
     QList<double> dist;
     while(qry->next())
     {
-        dist << qry->value(0).toInt() / 10.0;
+        dist << qry->value(0).toDouble();
     }
 
     // getting number of total rows
@@ -731,14 +731,16 @@ void MainWindow::on_BFS_clicked()
     }
 
     // preparing distance
-    qry->prepare("SELECT Distance * 10 FROM Distances");
+    qry->prepare("SELECT Distance FROM Distances");
     qry->exec();
 
     // populating distance list
     QList<double> dist;
     while(qry->next())
     {
-        dist << qry->value(0).toInt() / 10.0;
+        if (qry->value(0).toDouble() == 0.0)
+            dist << qry->value(0).toDouble() + 10.0;
+        else dist << qry->value(0).toDouble();
     }
 
     // getting number of total rows
@@ -786,7 +788,7 @@ void MainWindow::on_BFS_clicked()
         }
     }
 
-    ui->BFS_output->append("\nTotal distance traveled: " + QString::number(temp.sum));
+    ui->BFS_output->append("\nTotal distance traveled: " + QString::number(temp.sum - 10));
 
     ui->stackedWidget->setCurrentIndex(9);
 }

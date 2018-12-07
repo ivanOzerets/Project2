@@ -20,7 +20,7 @@ class Graph
 public:
     // construct a vector of vectors to represent an adjacency list
     vector<vector<int>> adjList;
-    double distList[96][96];
+    double distList[97][97];
     double sum;
     QStringList DFS;
 
