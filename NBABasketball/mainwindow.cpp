@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 #include "admindialog.h"
 #include "map.h"
+#include "dfs.h"
+#include "bfs.h"
+#include "mst.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -10,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Open the database -> you'll need to specify the path it's under on your computer
-    DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
+    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\SQLite\\DB\\NBAinfo.db";
     dbOpen();
 }
 
@@ -60,8 +63,6 @@ void MainWindow::on_adminButton_clicked()
         ui->stackedWidget->setCurrentIndex(1);
     }
 }
-
-
 
 /*
  *  StackedWidget Page 1 -> Administrative Tools
@@ -223,8 +224,6 @@ void MainWindow::on_adminBackPushButton_clicked()
     ui->stackedWidget->setCurrentIndex(0);
 }
 
-
-
 /*
  * StackedWidget Page 2 -> Add Team
  */
@@ -329,8 +328,6 @@ void MainWindow::on_atBackPushButton_clicked()
     ui->stackedWidget->setCurrentIndex(1);
 }
 
-
-
 /*
  * StackedWidget Page 3 -> Change Souvenir Prices
  */
@@ -412,8 +409,6 @@ void MainWindow::on_cspBackPushButton_clicked()
     ui->stackedWidget->setCurrentIndex(1);
 }
 
-
-
 /*
  * StackedWidget Page 4 -> Add Souvenirs
  */
@@ -450,8 +445,6 @@ void MainWindow::on_asBackPushButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(1);
 }
-
-
 
 /*
  * StackedWidget Page 5 -> Delete Souvenirs
@@ -506,8 +499,6 @@ void MainWindow::on_dsBackPushButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(1);
 }
-
-
 
 /*
  * StackedWidget Page 6 -> Modify Arena Information
@@ -579,4 +570,359 @@ void MainWindow::on_maiBackPushButton_clicked()
     ui->stackedWidget->setCurrentIndex(1);
 }
 
+void MainWindow::on_pushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(7);
+}
 
+void MainWindow::on_startBack_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(0);
+}
+
+void MainWindow::on_DFS_clicked()
+{
+    // Create the query for the BeginningTeamName column in the Distances table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // the data in lists
+    QStringList names, begTeam, endTeam;
+
+    // So this is the way the team data getting sorted into
+    // a list by unique team names
+    bool exists;
+    while(qry->next())
+    {
+        exists = false;
+        if (names.indexOf(qry->value(0).toString()) >= 0)
+        {
+            exists = true;
+        }
+        if (names.size() == 0 || !exists)
+        {
+            names << qry->value(0).toString();
+        }
+    }
+
+    // preparing beginning teams
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // populating beginning team list
+    while(qry->next())
+    {
+        begTeam << qry->value(0).toString();
+    }
+
+    // preparing ending teams
+    qry->prepare("SELECT EndingTeamName FROM Distances");
+    qry->exec();
+
+    // populating ending team list
+    while(qry->next())
+    {
+        endTeam << qry->value(0).toString();
+    }
+
+    // preparing distance
+    qry->prepare("SELECT Distance * 10 FROM Distances");
+    qry->exec();
+
+    // populating dicatance list
+    QList<double> dist;
+    while(qry->next())
+    {
+        dist << qry->value(0).toInt() / 10.0;
+    }
+
+    // getting number of total rows
+    int numberOfRows = 0;
+    if(qry->last())
+    {
+        numberOfRows = qry->at() + 1;
+        qry->first();
+        qry->previous();
+    }
+
+    // creating edges
+    vector<DFSedge> DFSedges;
+    for (int i = 0; i < numberOfRows; i++)
+    {
+        DFSedge edge = {names.indexOf(begTeam.at(i)), names.indexOf(endTeam.at(i)), dist.at(i)};
+        DFSedges.push_back(edge);
+    }
+
+    // create a graph from given edges
+    Graph graph(DFSedges, numberOfRows);
+
+    // stores vertex is discovered or not
+    vector<bool> discovered(numberOfRows);
+
+    ui->DFS_output->setText("DFS: \n");
+
+    DFS(graph, names.indexOf("Orlando Magic"), discovered, names);
+
+    // formatting output
+    QString str;
+    for (int i = 0; i < graph.DFS.size(); i++)
+    {
+        str = graph.DFS.at(i);
+        if (i == 0)
+        {
+            ui->DFS_output->append(str);
+        }
+        else
+        {
+            ui->DFS_output->append(" -> " + str);
+        }
+    }
+
+    ui->DFS_output->append("\nTotal distance traveled: " + QString::number(graph.sum));
+
+    ui->stackedWidget->setCurrentIndex(8);
+}
+
+void MainWindow::on_BFS_clicked()
+{
+    // Create the query for the BeginningTeamName column in the Distances table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // the data in lists
+    QStringList names, begTeam, endTeam;
+
+    // So this is the way the team data getting sorted into
+    // a list by unique team names
+    bool exists;
+    while(qry->next())
+    {
+        exists = false;
+        if (names.indexOf(qry->value(0).toString()) >= 0)
+        {
+            exists = true;
+        }
+        if (names.size() == 0 || !exists)
+        {
+            names << qry->value(0).toString();
+        }
+    }
+
+    // preparing beginning teams
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // populating beginning team list
+    while(qry->next())
+    {
+        begTeam << qry->value(0).toString();
+    }
+
+    // preparing ending teams
+    qry->prepare("SELECT EndingTeamName FROM Distances");
+    qry->exec();
+
+    // populating ending team list
+    while(qry->next())
+    {
+        endTeam << qry->value(0).toString();
+    }
+
+    // preparing distance
+    qry->prepare("SELECT Distance * 10 FROM Distances");
+    qry->exec();
+
+    // populating distance list
+    QList<double> dist;
+    while(qry->next())
+    {
+        dist << qry->value(0).toInt() / 10.0;
+    }
+
+    // getting number of total rows
+    int numberOfRows = 0;
+    if(qry->last())
+    {
+        numberOfRows = qry->at() + 1;
+        qry->first();
+        qry->previous();
+    }
+
+    // creating edges
+    vector<BFSedge> BFSedges;
+    for (int i = 0; i < numberOfRows; i++)
+    {
+        BFSedge edge = {names.indexOf(begTeam.at(i)), names.indexOf(endTeam.at(i)), dist.at(i)};
+        BFSedges.push_back(edge);
+    }
+
+    // creating adjacent matrix
+    vector< vector<double> > adjMatrix = FormAdjMatrix(BFSedges, names.size());
+
+    // create a graph from given edges
+    Temp temp;
+
+    // stores vertex is discovered or not
+    //vector<bool> discovered(numberOfRows);
+
+    ui->BFS_output->setText("BFS: \n");
+
+    BFS(temp, adjMatrix, names.indexOf("Los Angeles Lakers"), names);
+
+    // formatting output
+    QString str;
+    for (int i = 0; i < temp.BFS.size(); i++)
+    {
+        str = temp.BFS.at(i);
+        if (i == 0)
+        {
+            ui->BFS_output->append(str);
+        }
+        else
+        {
+            ui->BFS_output->append(" -> " + str);
+        }
+    }
+
+    ui->BFS_output->append("\nTotal distance traveled: " + QString::number(temp.sum));
+
+    ui->stackedWidget->setCurrentIndex(9);
+}
+
+void MainWindow::on_BFSBack_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(7);
+}
+
+void MainWindow::on_DFSBack_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(7);
+}
+
+void MainWindow::on_MST_clicked()
+{
+    // Create the query for the BeginningTeamName column in the Distances table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // the data in lists
+    QStringList arenas, names, begTeam, endTeam;
+
+    // So this is the way the team data getting sorted into
+    // a list by unique team names
+    bool exists;
+    while(qry->next())
+    {
+        exists = false;
+        if (names.indexOf(qry->value(0).toString()) >= 0)
+        {
+            exists = true;
+        }
+        if (names.size() == 0 || !exists)
+        {
+            names << qry->value(0).toString();
+        }
+    }
+
+    // preparing beginning teams
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    while(qry->next())
+    {
+        begTeam << qry->value(0).toString();
+    }
+
+    // preparing ending teams
+    qry->prepare("SELECT EndingTeamName FROM Distances");
+    qry->exec();
+
+    while(qry->next())
+    {
+        endTeam << qry->value(0).toString();
+    }
+
+    // preparing distance
+    qry->prepare("SELECT Distance * 10 FROM Distances");
+    qry->exec();
+
+    QList<double> dist;
+
+    while(qry->next())
+    {
+        dist << qry->value(0).toInt() / 10.0;
+    }
+
+    // getting number of total rows
+    int numberOfRows = 0;
+    if(qry->last())
+    {
+        numberOfRows = qry->at() + 1;
+        qry->first();
+        qry->previous();
+    }
+
+    // preparing beginning arenas
+    qry->prepare("SELECT BeginningArena FROM Distances");
+    qry->exec();
+
+    // So this is the way the arena data getting sorted into
+    // a list by unique arena names
+    int count = 0;
+    bool exists2;
+    while(qry->next())
+    {
+        exists2 = false;
+        if (arenas.indexOf(qry->value(0).toString()) >= 0 && (begTeam.indexOf(begTeam.at(count)) < count))
+        {
+            exists2 = true;
+        }
+        if (arenas.size() == 0 || !exists2)
+        {
+            arenas << qry->value(0).toString();
+        }
+        count++;
+    }
+
+    // creating edges
+    vector<MSTedge> MSTedges;
+    for (int i = 0; i < numberOfRows; i++)
+    {
+        MSTedge edge = {names.indexOf(begTeam.at(i)), names.indexOf(endTeam.at(i)), dist.at(i)};
+        MSTedges.push_back(edge);
+    }
+
+    // initializing MSTGraph struct
+    MSTGraph g(numberOfRows);
+
+    // adding edges
+    for (auto &edge: MSTedges)
+    {
+        g.addEdge(edge.src, edge.dest, edge.dist);
+    }
+
+    ui->MST_output->clear();
+    ui->MST_output->append("Edges of MST are:\n");
+
+    // finding edes
+    double mst_wt = g.kruskalMST(arenas);
+
+    // printing out edges
+    for (int i = 0; i < g.MSTedge1.size(); i++)
+    {
+        ui->MST_output->append(g.MSTedge1.at(i) + " - " + g.MSTedge2.at(i));
+    }
+
+    //printing out total weight
+    ui->MST_output->append("\nWeight of MST is " + QString::number(mst_wt));
+
+    ui->stackedWidget->setCurrentIndex(10);
+}
+
+void MainWindow::on_MSTBack_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(7);
+}

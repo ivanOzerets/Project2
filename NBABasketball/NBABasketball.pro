@@ -32,7 +32,10 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
     map.h \
-    admindialog.h
+    admindialog.h \
+    dfs.h \
+    bfs.h \
+    mst.h
 
 FORMS += \
         mainwindow.ui \

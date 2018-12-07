@@ -76,6 +76,22 @@ private slots:
 
     void on_uploadDistancePushButton_clicked();
 
+    void on_pushButton_clicked();
+
+    void on_startBack_clicked();
+
+    void on_DFS_clicked();
+
+    void on_BFS_clicked();
+
+    void on_BFSBack_clicked();
+
+    void on_DFSBack_clicked();
+
+    void on_MST_clicked();
+
+    void on_MSTBack_clicked();
+
 private:
     Ui::MainWindow *ui;
 
