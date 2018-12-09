@@ -12,6 +12,9 @@
 // For File Input
 #include <QFileDialog>
 
+// For Pop-Up Boxes
+#include <QMessageBox>
+
 // For Error Checking
 #include <QDebug>
 
@@ -91,6 +94,38 @@ private slots:
     void on_MST_clicked();
 
     void on_MSTBack_clicked();
+
+    void on_pushButton_totalSeatingCapacity_clicked();
+
+    void on_infoBackPushButton_clicked();
+
+    void on_singleTeamBackPushButton_clicked();
+
+    void on_nbaTeamsBackPushButton_clicked();
+
+    void on_pushButton_singleTeam_clicked();
+
+    void on_singleTeamSelectionComboBox_currentIndexChanged(const QString &arg1);
+
+    void on_pushButton_nbaTeams_clicked();
+
+    void on_pushButton_nbaArenas_clicked();
+
+    void on_pushButton_easternConferenceTeams_clicked();
+
+    void on_pushButton_southeastDivisionTeams_clicked();
+
+    void on_pushButton_nbaCoaches_clicked();
+
+    void on_pushButton_nbaArenasTeamsCapacities_clicked();
+
+    void on_pushButton_teamsArenasYears_clicked();
+
+    void on_souvenirsBackPushButton_clicked();
+
+    void on_pushButton_souvenirs_clicked();
+
+    void on_teamSelectionComboBox_souvenirs_currentIndexChanged(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;
