@@ -15,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Open the database -> you'll need to specify the path it's under on your computer
     //                   -> When you change the location, just comment out the others' location, and uncomment yours:
-//    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\SQLite\\DB\\NBAinfo.db";
-    DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
+    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\Project2_QT\\Project2\\NBAinfo.db";
+    //DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
     dbOpen();
 }
 
@@ -964,7 +964,7 @@ void MainWindow::on_denverNuggetsTrip_clicked()
     qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
     qry->exec();
 
-    // Create the modal to hold the query and set the arenaSelectionComboBox
+    // Create the modal to hold the query and set the trip selection ComboBox
     QSqlQueryModel *modal = new QSqlQueryModel();
     modal->setQuery(*qry);
     ui->tripSelection->setModel(modal);
@@ -992,6 +992,7 @@ void MainWindow::on_tripSelection_currentIndexChanged(const QString &arg1)
         qry->previous();
     }
 
+    // tests to know whether the trip has a starting team or not
     qry->next();
     if (qry->value(0).toString() == "Easter Egg")
     {
@@ -1062,6 +1063,7 @@ void MainWindow::on_undo_clicked()
     qry->prepare("SELECT TeamName FROM Trip");
     qry->exec();
 
+    // redisplays the teams after undo
     ui->teamsChosen->clear();
     while(qry->next())
     {
@@ -1155,6 +1157,7 @@ void MainWindow::on_nextTeam_clicked()
 
     if (teams.size() >= 1)
     {
+        // populate trip table
         for (int i = 0; i < teams.size(); i++)
         {
             qry->prepare("INSERT INTO Trip (TeamName) VALUES ('"+teams.at(i)+"')");
@@ -1167,6 +1170,7 @@ void MainWindow::on_nextTeam_clicked()
         for (int i = 0; i < dist.size(); ++i)
             addEdge(adj, names.indexOf(begTeam.at(i)), names.indexOf(endTeam.at(i)), dist.at(i));
 
+        // checking if order is preserved
         if (ui->orderPreservedCheck->isChecked())
         {
             QString str = teams.at(0);
@@ -1174,16 +1178,19 @@ void MainWindow::on_nextTeam_clicked()
             teams << str;
         }
 
+        // the distance from current to next team
         double shortDist = shortestPath(smallest, adj, names.size(), names.indexOf(str), names, teams);
 
         ui->teamNameDisplay->setText(smallest.small);
         ui->teamsVisited->append(smallest.small);
         ui->distFromPrevTeam->setText(QString::number(shortDist));
 
+        // checking if order is preserved
         if (!ui->orderPreservedCheck->isChecked())
         {
             QStringList teamsRevised;
 
+            // reordering the teams table
             teamsRevised << smallest.small;
             for (int i = 0; i < teams.size(); i++)
             {
@@ -1194,6 +1201,7 @@ void MainWindow::on_nextTeam_clicked()
             qry->prepare("DELETE FROM Trip");
             qry->exec();
 
+            // filling out teams table
             for (int i = 0; i < teamsRevised.size(); i++)
             {
                 qry->prepare("INSERT INTO Trip (TeamName) VALUES ('"+teamsRevised.at(i)+"')");
@@ -1206,6 +1214,7 @@ void MainWindow::on_nextTeam_clicked()
             qry->prepare("SELECT TeamName FROM Trip");
             qry->exec();
 
+            // filling out teams table
             while(qry->next())
             {
                 teams << qry->value(0).toString();
@@ -1223,6 +1232,7 @@ void MainWindow::on_nextTeam_clicked()
             qry->previous();
         }
 
+        // adding to the total
         double total= 0.0;
         if (numberOfRows > 0)
         {
@@ -1236,6 +1246,7 @@ void MainWindow::on_nextTeam_clicked()
         qry->prepare("DELETE FROM shortestDist");
         qry->exec();
 
+        // saving the total
         qry->prepare("INSERT INTO shortestDist (shortDist) VALUES ('"+QString::number(total)+"')");
         qry->exec();
     }
@@ -1317,6 +1328,7 @@ void MainWindow::on_detroitPistonsTrip_clicked()
         }
     }
 
+    // populating the team name table
     for (int i = 0; i < names.size(); i++)
     {
         if (names.at(i) != "Detroit Pistons")
