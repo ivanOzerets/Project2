@@ -14,7 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Open the database -> you'll need to specify the path it's under on your computer
-    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\Project2_QT\\NBAinfo.db";
+    //                   -> When you change the location, just comment out the others' location, and uncomment yours:
+    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\SQLite\\DB\\NBAinfo.db";
+    //DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
     dbOpen();
 }
 
@@ -564,6 +566,8 @@ void MainWindow::on_updatePushButton_clicked()
     modal2->setQuery(*qry);
     ui->modifyArenaInformationTreeView->setModel(modal2);
 }
+
+
 
 // Go from Modify Arena Information window to Admin window
 void MainWindow::on_maiBackPushButton_clicked()
@@ -1331,4 +1335,281 @@ void MainWindow::on_anyToAny_clicked()
     ui->orderPreservedCheck->setChecked(false);
 
     ui->stackedWidget->setCurrentIndex(9);
+}
+
+// This button will pop up a window that lets the user know the total seating capacity
+// of all the stadiums in the NBA
+void MainWindow::on_pushButton_totalSeatingCapacity_clicked()
+{
+    // Create a query for the total seating capacity
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT SUM(StadiumCapacity) FROM Information");
+    qry->exec();
+    qry->first();
+
+    // Display a box to allow the user to see the total seating capacity
+    QString total = "The total seating capacity of the NBA teams is: " + qry->value(0).toString();
+    QMessageBox::about(this,tr("Total Seating Capacity"),total);
+}
+
+// This button will take you from the information page to the main page
+void MainWindow::on_infoBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(0);
+}
+
+// This button will take you from the single team display page to the info page
+void MainWindow::on_singleTeamBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(11);
+}
+
+// This button will take you from the team display page to the info page
+void MainWindow::on_nbaTeamsBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(11);
+}
+
+// This button will take you from the souvenirs display page to the info page
+void MainWindow::on_souvenirsBackPushButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(11);
+}
+
+// This button will prepare the single team display page, and take you
+// from the info page to the single team display page
+void MainWindow::on_pushButton_singleTeam_clicked()
+{
+    // Create the query for the TeamName column in the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the query and set the teamSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->singleTeamSelectionComboBox->setModel(modal);
+
+    // Go to single team display page
+    ui->stackedWidget->setCurrentIndex(12);
+}
+
+// On the single team display page, adjust the labels according to the team the user
+// selects from the singleTeamSelectionComboBox
+void MainWindow::on_singleTeamSelectionComboBox_currentIndexChanged(const QString &arg1)
+{
+    // Create the query for the row in the Information table where TeamName == arg1
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT * FROM Information WHERE TeamName = '"+arg1+"'");
+    qry->exec();
+
+    // Fill the lineEdits on this window with the queried data
+    qry->first();
+    ui->displayTeamNameLabel->setText("Go, " + qry->value(2).toString() + "!");                 // Team Name
+    ui->arenaNameLabel->setText("Arena Name: " + qry->value(4).toString());                     // Arena Name
+    ui->arenaSeatingCapacityLabel->setText("Stadium Capacity: " + qry->value(5).toString());    // Stadium Capacity
+    ui->locationLabel->setText("Location: " + qry->value(3).toString());                        // Location
+    ui->conferenceLabel->setText("Conference: " + qry->value(0).toString());                    // Conference
+    ui->divisionLabel->setText("Division: " + qry->value(1).toString());                        // Division
+    ui->joinedLeagueLabel->setText("Joined League: " + qry->value(6).toString());               // Joined League
+    ui->coachLabel->setText("Coach: " + qry->value(7).toString());                              // Coach
+}
+
+// This button will prepare the nba teams display page, and take you
+// from the info page to the nba teams display page
+void MainWindow::on_pushButton_nbaTeams_clicked()
+{
+    // Set the header label to the appropriate text
+    ui->ambiguousLabel->setText("NBA Teams");
+    ui->totalSeatingCapacityLabel->hide();
+
+    // Query for the team names from the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_nbaTeams->setModel(modal);
+
+    // Go to nba teams display page
+    ui->stackedWidget->setCurrentIndex(13);
+}
+
+// This button will prepare the nba arenas display page, and take you
+// from the info page to the nba arenas display page
+void MainWindow::on_pushButton_nbaArenas_clicked()
+{
+    // Set the header label to the appropriate text
+    ui->ambiguousLabel->setText("NBA Arenas & Teams");
+    ui->totalSeatingCapacityLabel->hide();
+
+    // Query for the arena and team names from the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT ArenaName, TeamName FROM Information ORDER BY ArenaName ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_nbaTeams->setModel(modal);
+
+    // Go to nba teams display page
+    ui->stackedWidget->setCurrentIndex(13);
+}
+
+// This button will prepare the eastern conference teams display page, and take you
+// from the info page to the easter conference teams display page
+void MainWindow::on_pushButton_easternConferenceTeams_clicked()
+{
+    // Set the header label to the appropriate text
+    ui->ambiguousLabel->setText("Eastern Conference Teams");
+    ui->totalSeatingCapacityLabel->hide();
+
+    // Query for the team names from the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Information WHERE Conference = 'Eastern' ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_nbaTeams->setModel(modal);
+
+    // Go to nba teams display page
+    ui->stackedWidget->setCurrentIndex(13);
+}
+
+// This button will prepare the southeast division teams display page, and take you
+// from the info page to the southeast division teams display page
+void MainWindow::on_pushButton_southeastDivisionTeams_clicked()
+{
+    // Set the header label to the appropriate text
+    ui->ambiguousLabel->setText("Southeast Division Teams");
+    ui->totalSeatingCapacityLabel->hide();
+
+    // Query for the team names from the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Information WHERE Division = 'Southeast' ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_nbaTeams->setModel(modal);
+
+    // Go to nba teams display page
+    ui->stackedWidget->setCurrentIndex(13);
+}
+
+// This button will prepare the coaches and teams display page, and take you
+// from the info page to the coaches and teams display page
+void MainWindow::on_pushButton_nbaCoaches_clicked()
+{
+    // Set the header label to the appropriate text
+    ui->ambiguousLabel->setText("NBA Coaches and Teams");
+    ui->totalSeatingCapacityLabel->hide();
+
+    // Query for the team names from the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName, Coach FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_nbaTeams->setModel(modal);
+
+    // Go to nba teams display page
+    ui->stackedWidget->setCurrentIndex(13);
+}
+
+// This button will prepare the arenas, teams, seating capacities display page, and
+// take you to the arenas, teams, seating capacities display page
+void MainWindow::on_pushButton_nbaArenasTeamsCapacities_clicked()
+{
+    // Set the header label to the appropriate text
+    ui->ambiguousLabel->setText("NBA Arenas, Teams, and Seating Capacities");
+    ui->totalSeatingCapacityLabel->show();
+
+    // Query for the arenas, teams, and seating capacities from the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName, ArenaName, StadiumCapacity FROM Information ORDER BY StadiumCapacity ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_nbaTeams->setModel(modal);
+
+    // Create a query for the total seating capacity
+    qry->prepare("SELECT SUM(StadiumCapacity) FROM Information");
+    qry->exec();
+    qry->first();
+
+    // Set the side label to the appropriate text
+    QString total = "Total Seating Capacity: " + qry->value(0).toString();
+    ui->totalSeatingCapacityLabel->setText(total);
+
+    // Go to nba teams display page
+    ui->stackedWidget->setCurrentIndex(13);
+}
+
+// This button will prepare the teams, arenas, years display page, and take you
+// to the teams, arenas, years display page
+void MainWindow::on_pushButton_teamsArenasYears_clicked()
+{
+    // Set the header label to the appropriate text
+    ui->ambiguousLabel->setText("NBA Teams, Arenas, and Years");
+    ui->totalSeatingCapacityLabel->hide();
+
+    // Query for the team names from the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName, ArenaName, JoinedLeague FROM Information ORDER BY JoinedLeague ASC");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_nbaTeams->setModel(modal);
+
+    // Go to nba teams display page
+    ui->stackedWidget->setCurrentIndex(13);
+}
+
+// This button will prepare the souvenirs display page, and take you
+// to the souvenirs display page
+void MainWindow::on_pushButton_souvenirs_clicked()
+{
+    // Create the query for the TeamName column in the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the query and set the teamSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->teamSelectionComboBox_souvenirs->setModel(modal);
+
+    // Go to single team display page
+    ui->stackedWidget->setCurrentIndex(14);
+}
+
+// On the souvenirs display page, adjust the label and treeView according to the team the user
+// selects from the teamSelectionComboBox_souvenirs
+void MainWindow::on_teamSelectionComboBox_souvenirs_currentIndexChanged(const QString &arg1)
+{
+    // Create the query for the row(s) in the Souvenirs table where TeamName == arg1
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT Souvenir, Price FROM Souvenirs WHERE TeamName = '"+arg1+"'");
+    qry->exec();
+
+    // Create the modal to hold the new query and set the treeView_nbaTeams
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->treeView_souvenirs->setModel(modal);
+
+    // Fill the lineEdits on this window with the queried data
+    ui->displayTeamNameLabel_2->setText(arg1 + " Souvenirs");
 }
