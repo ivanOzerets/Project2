@@ -544,7 +544,7 @@ void MainWindow::on_updatePushButton_clicked()
 
     // Update the row in the Information table where ArenaName == placeholder
     qry->prepare("UPDATE Information SET Conference = ?, Division = ?, TeamName = ?, Location = ?, ArenaName = ?, "
-                 "StadiumCapacity = ?, JoinedLeague = ?, Coach = ? WHERE ArenaName = '"+ArenaNamePlaceholder+"'");
+                 "StadiumCapacity = ?, JoinedLeague = ?, Coach = ? WHERE ArenaName = '"+ArenaNamePlaceholder+"' AND TeamName = '"+TeamNamePlaceholder+"'");
     qry->addBindValue(ui->conferenceLineEdit->text());          // Conference
     qry->addBindValue(ui->divisionLineEdit->text());            // Division
     qry->addBindValue(ui->teamNameLineEdit->text());            // TeamName
@@ -1270,7 +1270,6 @@ void MainWindow::on_finishButton_clicked()
 
 void MainWindow::on_detroitPistonsTrip_clicked()
 {
-    // Create the query for the TeamName column in the Information table
     QSqlQuery *qry = new QSqlQuery(db);
     qry->prepare("DELETE FROM Trip");
     qry->exec();
