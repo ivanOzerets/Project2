@@ -533,15 +533,18 @@ void MainWindow::on_arenaSelectionComboBox_currentIndexChanged(const QString &ar
 void MainWindow::on_updatePushButton_clicked()
 {
     // Create a placeholder for the current index of the arenaSelectionComboBox
-    QString placeholder = ui->arenaSelectionComboBox->currentText();
+    QString ArenaNamePlaceholder = ui->arenaSelectionComboBox->currentText();
 
-    // Delete from the database the row where ArenaName == placeholder
+    // Create a placeholder2 for the current TeamName (before its change)
     QSqlQuery *qry = new QSqlQuery(db);
-    qry->prepare("DELETE FROM Information WHERE ArenaName = '"+placeholder+"'");
+    qry->prepare("SELECT * FROM Information WHERE ArenaName = '"+ArenaNamePlaceholder+"'");
     qry->exec();
+    qry->first();
+    QString TeamNamePlaceholder = qry->value(2).toString();
 
-    // Insert the newly modified arena
-    qry->prepare("INSERT INTO Information (Conference, Division, TeamName, Location, ArenaName, StadiumCapacity, JoinedLeague, Coach) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    // Update the row in the Information table where ArenaName == placeholder
+    qry->prepare("UPDATE Information SET Conference = ?, Division = ?, TeamName = ?, Location = ?, ArenaName = ?, "
+                 "StadiumCapacity = ?, JoinedLeague = ?, Coach = ? WHERE ArenaName = '"+ArenaNamePlaceholder+"'");
     qry->addBindValue(ui->conferenceLineEdit->text());          // Conference
     qry->addBindValue(ui->divisionLineEdit->text());            // Division
     qry->addBindValue(ui->teamNameLineEdit->text());            // TeamName
@@ -550,6 +553,26 @@ void MainWindow::on_updatePushButton_clicked()
     qry->addBindValue(ui->stadiumCapacityLineEdit->text());     // StadiumCapacity
     qry->addBindValue(ui->joinedLeagueLineEdit->text());        // JoinedLeague
     qry->addBindValue(ui->coachLineEdit->text());               // Coach
+    qry->exec();
+
+    // Update the BeginningTeamName in the Distances table
+    qry->prepare("UPDATE Distances SET BeginningTeamName = ? WHERE BeginningTeamName = '"+TeamNamePlaceholder+"'");
+    qry->addBindValue(ui->teamNameLineEdit->text());
+    qry->exec();
+
+    // Update EndingTeamName in the Distances table
+    qry->prepare("UPDATE Distances SET EndingTeamName = ? WHERE EndingTeamName = '"+TeamNamePlaceholder+"'");
+    qry->addBindValue(ui->teamNameLineEdit->text());
+    qry->exec();
+
+    // Update the BeginningArena in the Distances table
+    qry->prepare("UPDATE Distances SET BeginningArena = ? WHERE BeginningArena = '"+ArenaNamePlaceholder+"'");
+    qry->addBindValue(ui->arenaNameLineEdit->text());
+    qry->exec();
+
+    // Update TeamName in the Souvenirs table
+    qry->prepare("UPDATE Souvenirs SET TeamName = ? WHERE TeamName = '"+TeamNamePlaceholder+"'");
+    qry->addBindValue(ui->teamNameLineEdit->text());
     qry->exec();
 
     // Update the arenaSelectionComboBox (comboBox) -> Reused code from on_modifyArenaInformationButton_clicked()
