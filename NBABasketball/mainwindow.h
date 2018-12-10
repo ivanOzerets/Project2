@@ -76,21 +76,37 @@ private slots:
 
     void on_uploadDistancePushButton_clicked();
 
-    void on_pushButton_clicked();
-
     void on_startBack_clicked();
 
     void on_DFS_clicked();
 
     void on_BFS_clicked();
 
-    void on_BFSBack_clicked();
-
     void on_DFSBack_clicked();
 
     void on_MST_clicked();
 
-    void on_MSTBack_clicked();
+    void on_planATrip_clicked();
+
+    void on_denverNuggetsTrip_clicked();
+
+    void on_tripSelection_currentIndexChanged(const QString &arg1);
+
+    void on_startTrip_clicked();
+
+    void on_tripBack_clicked();
+
+    void on_undo_clicked();
+
+    void on_abandonTrip_clicked();
+
+    void on_nextTeam_clicked();
+
+    void on_finishButton_clicked();
+
+    void on_detroitPistonsTrip_clicked();
+
+    void on_anyToAny_clicked();
 
 private:
     Ui::MainWindow *ui;

@@ -35,7 +35,8 @@ HEADERS += \
     admindialog.h \
     dfs.h \
     bfs.h \
-    mst.h
+    mst.h \
+    dijkstras.h
 
 FORMS += \
         mainwindow.ui \

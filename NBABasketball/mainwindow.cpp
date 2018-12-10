@@ -5,6 +5,7 @@
 #include "dfs.h"
 #include "bfs.h"
 #include "mst.h"
+#include "dijkstras.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Open the database -> you'll need to specify the path it's under on your computer
-    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\SQLite\\DB\\NBAinfo.db";
+    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\Project2_QT\\NBAinfo.db";
     dbOpen();
 }
 
@@ -570,11 +571,6 @@ void MainWindow::on_maiBackPushButton_clicked()
     ui->stackedWidget->setCurrentIndex(1);
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(7);
-}
-
 void MainWindow::on_startBack_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
@@ -660,7 +656,7 @@ void MainWindow::on_DFS_clicked()
     // stores vertex is discovered or not
     vector<bool> discovered(numberOfRows);
 
-    ui->DFS_output->setText("DFS: \n");
+    ui->searchOutput->setText("DFS: \n");
 
     DFS(graph, names.indexOf("Orlando Magic"), discovered, names);
 
@@ -671,15 +667,15 @@ void MainWindow::on_DFS_clicked()
         str = graph.DFS.at(i);
         if (i == 0)
         {
-            ui->DFS_output->append(str);
+            ui->searchOutput->append(str);
         }
         else
         {
-            ui->DFS_output->append(" -> " + str);
+            ui->searchOutput->append(" -> " + str);
         }
     }
 
-    ui->DFS_output->append("\nTotal distance traveled: " + QString::number(graph.sum));
+    ui->searchOutput->append("\nTotal distance traveled: " + QString::number(graph.sum));
 
     ui->stackedWidget->setCurrentIndex(8);
 }
@@ -769,7 +765,7 @@ void MainWindow::on_BFS_clicked()
     // stores vertex is discovered or not
     //vector<bool> discovered(numberOfRows);
 
-    ui->BFS_output->setText("BFS: \n");
+    ui->searchOutput->setText("BFS: \n");
 
     BFS(temp, adjMatrix, names.indexOf("Los Angeles Lakers"), names);
 
@@ -780,22 +776,17 @@ void MainWindow::on_BFS_clicked()
         str = temp.BFS.at(i);
         if (i == 0)
         {
-            ui->BFS_output->append(str);
+            ui->searchOutput->append(str);
         }
         else
         {
-            ui->BFS_output->append(" -> " + str);
+            ui->searchOutput->append(" -> " + str);
         }
     }
 
-    ui->BFS_output->append("\nTotal distance traveled: " + QString::number(temp.sum - 10));
+    ui->searchOutput->append("\nTotal distance traveled: " + QString::number(temp.sum - 10));
 
-    ui->stackedWidget->setCurrentIndex(9);
-}
-
-void MainWindow::on_BFSBack_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(7);
+    ui->stackedWidget->setCurrentIndex(8);
 }
 
 void MainWindow::on_DFSBack_clicked()
@@ -848,14 +839,14 @@ void MainWindow::on_MST_clicked()
     }
 
     // preparing distance
-    qry->prepare("SELECT Distance * 10 FROM Distances");
+    qry->prepare("SELECT Distance FROM Distances");
     qry->exec();
 
     QList<double> dist;
 
     while(qry->next())
     {
-        dist << qry->value(0).toInt() / 10.0;
+        dist << qry->value(0).toDouble();
     }
 
     // getting number of total rows
@@ -906,8 +897,8 @@ void MainWindow::on_MST_clicked()
         g.addEdge(edge.src, edge.dest, edge.dist);
     }
 
-    ui->MST_output->clear();
-    ui->MST_output->append("Edges of MST are:\n");
+    ui->searchOutput->clear();
+    ui->searchOutput->append("Edges of MST are:\n");
 
     // finding edes
     double mst_wt = g.kruskalMST(arenas);
@@ -915,16 +906,429 @@ void MainWindow::on_MST_clicked()
     // printing out edges
     for (int i = 0; i < g.MSTedge1.size(); i++)
     {
-        ui->MST_output->append(g.MSTedge1.at(i) + " - " + g.MSTedge2.at(i));
+        ui->searchOutput->append(g.MSTedge1.at(i) + " - " + g.MSTedge2.at(i));
     }
 
     //printing out total weight
-    ui->MST_output->append("\nWeight of MST is " + QString::number(mst_wt));
+    ui->searchOutput->append("\nWeight of MST is " + QString::number(mst_wt));
+
+    ui->stackedWidget->setCurrentIndex(8);
+}
+
+void MainWindow::on_planATrip_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(7);
+}
+
+void MainWindow::on_denverNuggetsTrip_clicked()
+{
+    // Create the query for the TeamName column in the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Trip");
+    qry->exec();
+
+    qry->prepare("DELETE FROM shortestDist");
+    qry->exec();
+
+    ui->teamsVisited->clear();
+    ui->teamsChosen->clear();
+    ui->finalTotalDist->clear();
+
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the query and set the arenaSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->tripSelection->setModel(modal);
+
+    qry->prepare("INSERT INTO Trip (TeamName) VALUES ('Denver Nuggets')");
+    qry->exec();
+
+    ui->teamsChosen->append("Denver Nuggets");
+    ui->orderPreservedCheck->setChecked(false);
+
+    ui->stackedWidget->setCurrentIndex(9);
+}
+
+void MainWindow::on_tripSelection_currentIndexChanged(const QString &arg1)
+{
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    int numberOfRows = 0;
+    if(qry->last())
+    {
+        numberOfRows = qry->at() + 1;
+        qry->first();
+        qry->previous();
+    }
+
+    qry->next();
+    if (qry->value(0).toString() == "Easter Egg")
+    {
+        qry->prepare("DELETE FROM Trip");
+        qry->exec();
+
+        ui->teamsChosen->append(arg1);
+
+        qry->prepare("INSERT INTO Trip (TeamName) VALUES ('"+arg1+"')");
+        qry->exec();
+    }
+    else if (numberOfRows != 0)
+    {
+        ui->teamsChosen->append(arg1);
+
+        qry->prepare("INSERT INTO Trip (TeamName) VALUES ('"+arg1+"')");
+        qry->exec();
+    }
+}
+
+void MainWindow::on_startTrip_clicked()
+{
+    // Create the query for the TeamName column in the Trip table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    qry->next();
+    QString str = qry->value(0).toString();
+
+    ui->teamNameDisplay->setText(str);
+    ui->teamsVisited->append(str);
+    ui->distFromPrevTeam->setText("0");
+    ui->totalDistance->setText("0");
 
     ui->stackedWidget->setCurrentIndex(10);
 }
 
-void MainWindow::on_MSTBack_clicked()
+void MainWindow::on_tripBack_clicked()
+{
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Trip");
+    qry->exec();
+
+    ui->teamsChosen->clear();
+
+    ui->stackedWidget->setCurrentIndex(7);
+}
+
+void MainWindow::on_undo_clicked()
+{
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    // getting number of total rows
+    int numberOfRows = 0;
+    if(qry->last())
+    {
+        numberOfRows = qry->at() + 1;
+        qry->first();
+        qry->previous();
+    }
+
+    qry->prepare("DELETE FROM Trip WHERE id = '" + QString::number(numberOfRows) + "'");
+    qry->exec();
+
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    ui->teamsChosen->clear();
+    while(qry->next())
+    {
+        ui->teamsChosen->append(qry->value(0).toString());
+    }
+}
+
+void MainWindow::on_abandonTrip_clicked()
 {
     ui->stackedWidget->setCurrentIndex(7);
+}
+
+void MainWindow::on_nextTeam_clicked()
+{
+    // Create the query for the BeginningTeamName column in the Distances table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // the data in lists
+    QStringList names, begTeam, endTeam;
+
+    // So this is the way the team data getting sorted into
+    // a list by unique team names
+    bool exists;
+    while(qry->next())
+    {
+        exists = false;
+        if (names.indexOf(qry->value(0).toString()) >= 0)
+        {
+            exists = true;
+        }
+        if (names.size() == 0 || !exists)
+        {
+            names << qry->value(0).toString();
+        }
+    }
+
+    // preparing beginning teams
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // populating beginning team list
+    while(qry->next())
+    {
+        begTeam << qry->value(0).toString();
+    }
+
+    // preparing ending teams
+    qry->prepare("SELECT EndingTeamName FROM Distances");
+    qry->exec();
+
+    // populating ending team list
+    while(qry->next())
+    {
+        endTeam << qry->value(0).toString();
+    }
+
+    // preparing distance
+    qry->prepare("SELECT Distance FROM Distances");
+    qry->exec();
+
+    // populating distance list
+    QList<double> dist;
+    while(qry->next())
+    {
+        dist << qry->value(0).toDouble();
+    }
+
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    qry->next();
+    QString str = qry->value(0).toString();
+
+    qry->prepare("DELETE FROM Trip WHERE id = 1");
+    qry->exec();
+
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    QStringList teams;
+
+    while(qry->next())
+    {
+        teams << qry->value(0).toString();
+    }
+
+    qry->prepare("DELETE FROM Trip");
+    qry->exec();
+
+    if (teams.size() >= 1)
+    {
+        for (int i = 0; i < teams.size(); i++)
+        {
+            qry->prepare("INSERT INTO Trip (TeamName) VALUES ('"+teams.at(i)+"')");
+            qry->exec();
+        }
+
+        vector<iPairD > adj[names.size()];
+        Shortest smallest;
+
+        for (int i = 0; i < dist.size(); ++i)
+            addEdge(adj, names.indexOf(begTeam.at(i)), names.indexOf(endTeam.at(i)), dist.at(i));
+
+        if (ui->orderPreservedCheck->isChecked())
+        {
+            QString str = teams.at(0);
+            teams.clear();
+            teams << str;
+        }
+
+        double shortDist = shortestPath(smallest, adj, names.size(), names.indexOf(str), names, teams);
+
+        ui->teamNameDisplay->setText(smallest.small);
+        ui->teamsVisited->append(smallest.small);
+        ui->distFromPrevTeam->setText(QString::number(shortDist));
+
+        if (!ui->orderPreservedCheck->isChecked())
+        {
+            QStringList teamsRevised;
+
+            teamsRevised << smallest.small;
+            for (int i = 0; i < teams.size(); i++)
+            {
+                if (teams.at(i) != smallest.small)
+                    teamsRevised << teams.at(i);
+            }
+
+            qry->prepare("DELETE FROM Trip");
+            qry->exec();
+
+            for (int i = 0; i < teamsRevised.size(); i++)
+            {
+                qry->prepare("INSERT INTO Trip (TeamName) VALUES ('"+teamsRevised.at(i)+"')");
+                qry->exec();
+            }
+        }
+        else
+        {
+            teams.clear();
+            qry->prepare("SELECT TeamName FROM Trip");
+            qry->exec();
+
+            while(qry->next())
+            {
+                teams << qry->value(0).toString();
+            }
+        }
+
+        qry->prepare("SELECT shortDist FROM shortestDist");
+        qry->exec();
+
+        int numberOfRows = 0;
+        if(qry->last())
+        {
+            numberOfRows = qry->at() + 1;
+            qry->first();
+            qry->previous();
+        }
+
+        double total= 0.0;
+        if (numberOfRows > 0)
+        {
+            qry->next();
+            total = qry->value(0).toDouble() + shortDist;
+        }
+        else total = shortDist;
+
+        ui->totalDistance->setText(QString::number(total));
+
+        qry->prepare("DELETE FROM shortestDist");
+        qry->exec();
+
+        qry->prepare("INSERT INTO shortestDist (shortDist) VALUES ('"+QString::number(total)+"')");
+        qry->exec();
+    }
+
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    // getting number of total rows
+    int numberOfRows = 0;
+    if(qry->last())
+    {
+        numberOfRows = qry->at() + 1;
+        qry->first();
+        qry->previous();
+    }
+
+    qry->prepare("SELECT shortDist FROM shortestDist");
+    qry->exec();
+    qry->next();
+
+    if (numberOfRows == 0)
+    {
+        ui->finalTotalDist->setText(QString::number(qry->value(0).toDouble()));
+        ui->stackedWidget->setCurrentIndex(11);
+    }
+}
+
+void MainWindow::on_finishButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(7);
+}
+
+void MainWindow::on_detroitPistonsTrip_clicked()
+{
+    // Create the query for the TeamName column in the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Trip");
+    qry->exec();
+
+    qry->prepare("DELETE FROM shortestDist");
+    qry->exec();
+
+    ui->teamsVisited->clear();
+    ui->teamsChosen->clear();
+    ui->finalTotalDist->clear();
+
+    qry->prepare("INSERT INTO Trip (TeamName) VALUES ('Detroit Pistons')");
+    qry->exec();
+
+    qry->prepare("SELECT TeamName FROM Trip");
+    qry->exec();
+
+    qry->next();
+    QString str = qry->value(0).toString();
+
+    ui->teamNameDisplay->setText(str);
+    ui->teamsVisited->append(str);
+    ui->distFromPrevTeam->setText("0");
+    ui->totalDistance->setText("0");
+
+    qry->prepare("SELECT BeginningTeamName FROM Distances");
+    qry->exec();
+
+    // the data in lists
+    QStringList names;
+
+    // So this is the way the team data getting sorted into
+    // a list by unique team names
+    bool exists;
+    while(qry->next())
+    {
+        exists = false;
+        if (names.indexOf(qry->value(0).toString()) >= 0)
+        {
+            exists = true;
+        }
+        if (names.size() == 0 || !exists)
+        {
+            names << qry->value(0).toString();
+        }
+    }
+
+    for (int i = 0; i < names.size(); i++)
+    {
+        if (names.at(i) != "Detroit Pistons")
+        {
+            qry->prepare("INSERT INTO Trip (TeamName) VALUES ('"+names.at(i)+"')");
+            qry->exec();
+        }
+    }
+
+    ui->stackedWidget->setCurrentIndex(10);
+}
+
+void MainWindow::on_anyToAny_clicked()
+{
+    // Create the query for the TeamName column in the Information table
+    QSqlQuery *qry = new QSqlQuery(db);
+    qry->prepare("DELETE FROM Trip");
+    qry->exec();
+
+    qry->prepare("DELETE FROM shortestDist");
+    qry->exec();
+
+    ui->teamsVisited->clear();
+    ui->teamsChosen->clear();
+    ui->finalTotalDist->clear();
+
+    qry->prepare("SELECT TeamName FROM Information ORDER BY TeamName ASC");
+    qry->exec();
+
+    // Create the modal to hold the query and set the arenaSelectionComboBox
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->tripSelection->setModel(modal);
+
+    qry->prepare("INSERT INTO Trip (TeamName) VALUES ('Easter Egg')");
+    qry->exec();
+
+    ui->orderPreservedCheck->setChecked(false);
+
+    ui->stackedWidget->setCurrentIndex(9);
 }
