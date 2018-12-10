@@ -143,6 +143,8 @@ private slots:
 
     void on_teamSelectionComboBox_souvenirs_currentIndexChanged(const QString &arg1);
 
+    void on_pushButton_Information_clicked();
+
 private:
     Ui::MainWindow *ui;
 

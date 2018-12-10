@@ -15,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Open the database -> you'll need to specify the path it's under on your computer
     //                   -> When you change the location, just comment out the others' location, and uncomment yours:
-    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\SQLite\\DB\\NBAinfo.db";
-    //DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
+//    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\SQLite\\DB\\NBAinfo.db";
+    DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
     dbOpen();
 }
 
@@ -1361,19 +1361,19 @@ void MainWindow::on_infoBackPushButton_clicked()
 // This button will take you from the single team display page to the info page
 void MainWindow::on_singleTeamBackPushButton_clicked()
 {
-    ui->stackedWidget->setCurrentIndex(11);
+    ui->stackedWidget->setCurrentIndex(12);
 }
 
 // This button will take you from the team display page to the info page
 void MainWindow::on_nbaTeamsBackPushButton_clicked()
 {
-    ui->stackedWidget->setCurrentIndex(11);
+    ui->stackedWidget->setCurrentIndex(12);
 }
 
 // This button will take you from the souvenirs display page to the info page
 void MainWindow::on_souvenirsBackPushButton_clicked()
 {
-    ui->stackedWidget->setCurrentIndex(11);
+    ui->stackedWidget->setCurrentIndex(12);
 }
 
 // This button will prepare the single team display page, and take you
@@ -1391,7 +1391,7 @@ void MainWindow::on_pushButton_singleTeam_clicked()
     ui->singleTeamSelectionComboBox->setModel(modal);
 
     // Go to single team display page
-    ui->stackedWidget->setCurrentIndex(12);
+    ui->stackedWidget->setCurrentIndex(13);
 }
 
 // On the single team display page, adjust the labels according to the team the user
@@ -1434,7 +1434,7 @@ void MainWindow::on_pushButton_nbaTeams_clicked()
     ui->treeView_nbaTeams->setModel(modal);
 
     // Go to nba teams display page
-    ui->stackedWidget->setCurrentIndex(13);
+    ui->stackedWidget->setCurrentIndex(14);
 }
 
 // This button will prepare the nba arenas display page, and take you
@@ -1456,7 +1456,7 @@ void MainWindow::on_pushButton_nbaArenas_clicked()
     ui->treeView_nbaTeams->setModel(modal);
 
     // Go to nba teams display page
-    ui->stackedWidget->setCurrentIndex(13);
+    ui->stackedWidget->setCurrentIndex(14);
 }
 
 // This button will prepare the eastern conference teams display page, and take you
@@ -1478,7 +1478,7 @@ void MainWindow::on_pushButton_easternConferenceTeams_clicked()
     ui->treeView_nbaTeams->setModel(modal);
 
     // Go to nba teams display page
-    ui->stackedWidget->setCurrentIndex(13);
+    ui->stackedWidget->setCurrentIndex(14);
 }
 
 // This button will prepare the southeast division teams display page, and take you
@@ -1500,7 +1500,7 @@ void MainWindow::on_pushButton_southeastDivisionTeams_clicked()
     ui->treeView_nbaTeams->setModel(modal);
 
     // Go to nba teams display page
-    ui->stackedWidget->setCurrentIndex(13);
+    ui->stackedWidget->setCurrentIndex(14);
 }
 
 // This button will prepare the coaches and teams display page, and take you
@@ -1522,7 +1522,7 @@ void MainWindow::on_pushButton_nbaCoaches_clicked()
     ui->treeView_nbaTeams->setModel(modal);
 
     // Go to nba teams display page
-    ui->stackedWidget->setCurrentIndex(13);
+    ui->stackedWidget->setCurrentIndex(14);
 }
 
 // This button will prepare the arenas, teams, seating capacities display page, and
@@ -1553,7 +1553,7 @@ void MainWindow::on_pushButton_nbaArenasTeamsCapacities_clicked()
     ui->totalSeatingCapacityLabel->setText(total);
 
     // Go to nba teams display page
-    ui->stackedWidget->setCurrentIndex(13);
+    ui->stackedWidget->setCurrentIndex(14);
 }
 
 // This button will prepare the teams, arenas, years display page, and take you
@@ -1575,7 +1575,7 @@ void MainWindow::on_pushButton_teamsArenasYears_clicked()
     ui->treeView_nbaTeams->setModel(modal);
 
     // Go to nba teams display page
-    ui->stackedWidget->setCurrentIndex(13);
+    ui->stackedWidget->setCurrentIndex(14);
 }
 
 // This button will prepare the souvenirs display page, and take you
@@ -1593,7 +1593,7 @@ void MainWindow::on_pushButton_souvenirs_clicked()
     ui->teamSelectionComboBox_souvenirs->setModel(modal);
 
     // Go to single team display page
-    ui->stackedWidget->setCurrentIndex(14);
+    ui->stackedWidget->setCurrentIndex(15);
 }
 
 // On the souvenirs display page, adjust the label and treeView according to the team the user
@@ -1612,4 +1612,10 @@ void MainWindow::on_teamSelectionComboBox_souvenirs_currentIndexChanged(const QS
 
     // Fill the lineEdits on this window with the queried data
     ui->displayTeamNameLabel_2->setText(arg1 + " Souvenirs");
+}
+
+// Takes the user from main window to the info page
+void MainWindow::on_pushButton_Information_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(12);
 }
