@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>6</number>
+     <number>11</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QLabel" name="label">
@@ -1549,45 +1549,14 @@
        </font>
       </property>
       <property name="text">
-       <string>Your Trip has ended.</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_12">
-      <property name="geometry">
-       <rect>
-        <x>90</x>
-        <y>110</y>
-        <width>71</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Trip Totals:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_13">
-      <property name="geometry">
-       <rect>
-        <x>90</x>
-        <y>160</y>
-        <width>81</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Total Distance: </string>
+       <string>Trip Conclusion</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="finalTotalDist">
       <property name="geometry">
        <rect>
-        <x>170</x>
-        <y>160</y>
+        <x>700</x>
+        <y>150</y>
         <width>113</width>
         <height>20</height>
        </rect>
@@ -1596,14 +1565,78 @@
      <widget class="QPushButton" name="finishButton">
       <property name="geometry">
        <rect>
-        <x>1020</x>
-        <y>570</y>
+        <x>1050</x>
+        <y>580</y>
         <width>91</width>
         <height>31</height>
        </rect>
       </property>
       <property name="text">
        <string>Finish</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_totalTripPurchase">
+      <property name="geometry">
+       <rect>
+        <x>570</x>
+        <y>120</y>
+        <width>111</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Total Trip Purchase: $</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_totalDistanceTraveled">
+      <property name="geometry">
+       <rect>
+        <x>570</x>
+        <y>150</y>
+        <width>121</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Total Distance Traveled:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="finalTotalPurch">
+      <property name="geometry">
+       <rect>
+        <x>700</x>
+        <y>120</y>
+        <width>113</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QTreeView" name="treeView_shoppingCart">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>120</y>
+        <width>501</width>
+        <height>471</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_purchases">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>80</y>
+        <width>161</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Your Purchases:</string>
       </property>
      </widget>
     </widget>

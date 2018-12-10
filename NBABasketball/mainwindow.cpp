@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "admindialog.h"
+#include "souvenirsdialog.h"
 #include "map.h"
 #include "dfs.h"
 #include "bfs.h"
@@ -46,6 +47,18 @@ bool MainWindow::dbOpen()
  */
 void MainWindow::dbClose()
 {
+    QSqlQuery qry;
+
+    if(db.isOpen())
+    {
+    qry.exec("DELETE FROM ShoppingCart");
+    }
+    else
+    {
+      db.open();
+      qry.exec("DELETE FROM ShoppingCart");
+    }
+
     db.close();
 }
 
@@ -1027,6 +1040,17 @@ void MainWindow::on_startTrip_clicked()
     ui->distFromPrevTeam->setText("0");
     ui->totalDistance->setText("0");
 
+
+
+    // Set the souvenirs tree to display the first team's souvenirs
+    qry->prepare("SELECT Souvenir, Price FROM Souvenirs WHERE TeamName = '"+str+"'");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->souvenirTreeView->setModel(modal);
+
+
+
     ui->stackedWidget->setCurrentIndex(10);
 }
 
@@ -1071,6 +1095,18 @@ void MainWindow::on_undo_clicked()
 
 void MainWindow::on_abandonTrip_clicked()
 {
+    QSqlQuery qry;
+
+    if(db.isOpen())
+    {
+    qry.exec("DELETE FROM ShoppingCart");
+    }
+    else
+    {
+      db.open();
+      qry.exec("DELETE FROM ShoppingCart");
+    }
+
     ui->stackedWidget->setCurrentIndex(7);
 }
 
@@ -1180,6 +1216,20 @@ void MainWindow::on_nextTeam_clicked()
         ui->teamsVisited->append(smallest.small);
         ui->distFromPrevTeam->setText(QString::number(shortDist));
 
+
+
+        // Display the team's souvenirs in the souvenir tree
+        qry->prepare("SELECT Souvenir, Price FROM Souvenirs WHERE TeamName = '"+smallest.small+"'");
+        qry->exec();
+        QSqlQueryModel *modal = new QSqlQueryModel();
+        modal->setQuery(*qry);
+        ui->souvenirTreeView->setModel(modal);
+
+        // Reset team total to 0
+        ui->teamPriceTotal->setText("0");
+
+
+
         if (!ui->orderPreservedCheck->isChecked())
         {
             QStringList teamsRevised;
@@ -1259,12 +1309,35 @@ void MainWindow::on_nextTeam_clicked()
     if (numberOfRows == 0)
     {
         ui->finalTotalDist->setText(QString::number(qry->value(0).toDouble()));
+
+        // Set the finalTotalPurch
+        ui->finalTotalPurch->setText(ui->teamGrandTotal->text());
+
+        // Set purchases tree view
+        qry->prepare("SELECT * FROM ShoppingCart");
+        qry->exec();
+        QSqlQueryModel *model = new QSqlQueryModel;
+        model->setQuery(*qry);
+        ui->treeView_shoppingCart->setModel(model);
+
         ui->stackedWidget->setCurrentIndex(11);
     }
 }
 
 void MainWindow::on_finishButton_clicked()
 {
+    QSqlQuery qry;
+
+    if(db.isOpen())
+    {
+    qry.exec("DELETE FROM ShoppingCart");
+    }
+    else
+    {
+      db.open();
+      qry.exec("DELETE FROM ShoppingCart");
+    }
+
     ui->stackedWidget->setCurrentIndex(7);
 }
 
@@ -1294,6 +1367,17 @@ void MainWindow::on_detroitPistonsTrip_clicked()
     ui->teamsVisited->append(str);
     ui->distFromPrevTeam->setText("0");
     ui->totalDistance->setText("0");
+
+
+
+    // Set the souvenirs tree to display the first team's souvenirs
+    qry->prepare("SELECT Souvenir, Price FROM Souvenirs WHERE TeamName = '"+str+"'");
+    qry->exec();
+    QSqlQueryModel *modal = new QSqlQueryModel();
+    modal->setQuery(*qry);
+    ui->souvenirTreeView->setModel(modal);
+
+
 
     qry->prepare("SELECT BeginningTeamName FROM Distances");
     qry->exec();
@@ -1640,4 +1724,69 @@ void MainWindow::on_teamSelectionComboBox_souvenirs_currentIndexChanged(const QS
 void MainWindow::on_pushButton_Information_clicked()
 {
     ui->stackedWidget->setCurrentIndex(12);
+}
+
+// When a souvenir is double clicked from the trip page, open up a pop-up box...
+// Display the souvenir name on the box, and take in from the user how many of
+// that item they wish to purchase...
+// When the enter button is clicked, add that amount of that item to the shoppingCart table
+void MainWindow::on_souvenirTreeView_doubleClicked(const QModelIndex &index)
+{
+    // Creates the admin dialog window
+    souvenirsDialog *numOfSouvenirs;
+    numOfSouvenirs = new souvenirsDialog();
+
+    // This is necessary because the tree displays 2 columns, and we need to pay attention
+    // to which column the user double-clicked on -> basically this ensures that we're working
+    // with the columns reading from left to right regardless of where the user clicked
+    QModelIndex newIndex;
+
+    int row = index.row();
+    int col = index.column();
+
+    if( col > 0 ) {
+        newIndex = index.sibling(row, 0);
+    }
+    else {
+        newIndex = index.sibling(row, col);
+    }
+
+    QString col1Data = newIndex.data().toString();  // Col1 @ Row# -> the souvenir name
+    QString col2Data = newIndex.sibling(row, 1).data().toString();  // Col2 @ Row# -> the souvenir price
+
+    // Set the numOfSouvenir's souvenir label to the name of the souvenir the user selected
+    numOfSouvenirs->setLabel(col1Data);
+
+    // Sets the modal for the admin dialog window, then executes
+    numOfSouvenirs->setModal(true);
+    numOfSouvenirs->exec();
+
+    // Take the # of souvenirs to be purchased from the dialog box, and add that many to the
+    // shopping cart table
+    QSqlQuery *qry = new QSqlQuery(db);
+    int num = numOfSouvenirs->getNum();
+    for(int i = 0; i < num; i++) {
+        qry->prepare("INSERT INTO ShoppingCart (TeamName, Souvenir, Price) VALUES (?, ?, ?)");
+        qry->addBindValue(ui->teamNameDisplay->text());
+        qry->addBindValue(col1Data);
+        qry->addBindValue(col2Data);
+        qry->exec();
+    }
+
+    // Update the totalPrice box
+    QString priceStr = col2Data;
+    priceStr.remove('$');
+    double price = num * priceStr.toDouble();
+    double price2 = num * priceStr.toDouble();
+
+    // Take the price from text box and add
+    price = price + ui->teamPriceTotal->text().toDouble();
+    price2 = price2 + ui->teamGrandTotal->text().toDouble();
+
+    priceStr = QString::number(price);
+    QString priceStr2 = QString::number(price2);
+
+    // Reset textbox
+    ui->teamPriceTotal->setText(priceStr);
+    ui->teamGrandTotal->setText(priceStr2);
 }

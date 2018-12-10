@@ -145,6 +145,8 @@ private slots:
 
     void on_pushButton_Information_clicked();
 
+    void on_souvenirTreeView_doubleClicked(const QModelIndex &index);
+
 private:
     Ui::MainWindow *ui;
 

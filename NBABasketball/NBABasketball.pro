@@ -27,7 +27,8 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    admindialog.cpp
+    admindialog.cpp \
+    souvenirsdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -36,11 +37,13 @@ HEADERS += \
     dfs.h \
     bfs.h \
     mst.h \
-    dijkstras.h
+    dijkstras.h \
+    souvenirsdialog.h
 
 FORMS += \
         mainwindow.ui \
-    admindialog.ui
+    admindialog.ui \
+    souvenirsdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
