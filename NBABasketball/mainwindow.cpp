@@ -17,12 +17,29 @@ MainWindow::MainWindow(QWidget *parent) :
     // Open the database -> you'll need to specify the path it's under on your computer
     //                   -> When you change the location, just comment out the others' location, and uncomment yours:
 //    DB_Path = "C:\\Users\\Ivan\\School\\Saddleback\\CS1D\\Project2\\SQLite\\DB\\NBAinfo.db";
-    DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
+//    DB_Path = "D:\\System Files\\My Documents\\git\\Project2\\NBAinfo.db";
+    DB_Path = "C:\\Users\\Alecstar\\Documents\\GitHub\\Project2\\NBAinfo.db";
     dbOpen();
+
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
 {
+    QSqlQuery qry;
+
+    if(db.isOpen())
+    {
+    qry.exec("DELETE FROM ShoppingCart");
+    }
+    else
+    {
+      db.open();
+      qry.exec("DELETE FROM ShoppingCart");
+    }
+
+    dbClose();
+
     delete ui;
 }
 
@@ -47,18 +64,6 @@ bool MainWindow::dbOpen()
  */
 void MainWindow::dbClose()
 {
-    QSqlQuery qry;
-
-    if(db.isOpen())
-    {
-    qry.exec("DELETE FROM ShoppingCart");
-    }
-    else
-    {
-      db.open();
-      qry.exec("DELETE FROM ShoppingCart");
-    }
-
     db.close();
 }
 
@@ -277,13 +282,24 @@ void MainWindow::on_uploadExpansionPushButton_clicked()
             qry->exec();
 
             // Insert the traditional souvenirs for this new team into the Souvenirs table
-            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Autographed Basketball', '$49.89')");
+            QString temporary = list[2] + " Autographed Basketball";
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', ?, '$49.89')");
+            qry->addBindValue(temporary);
             qry->exec();
-            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Team Pennant', '$17.99')");
+
+            temporary = list[2] + " Team Pennant";
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', ?, '$17.99')");
+            qry->addBindValue(temporary);
             qry->exec();
-            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Team Picture', '$29.99')");
+
+            temporary = list[2] + " Team Picture";
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', ?, '$29.99')");
+            qry->addBindValue(temporary);
             qry->exec();
-            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', 'Team Jersey', '$179.99')");
+
+            temporary = list[2] + " Team Jersey";
+            qry->prepare("INSERT INTO Souvenirs (TeamName, Souvenir, Price) VALUES ('"+list[2]+"', ?, '$179.99')");
+            qry->addBindValue(temporary);
             qry->exec();
         }
     }
